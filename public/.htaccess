@@ -1,0 +1,14 @@
+Options -Indexes
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.carrutherslaw\.ca$ [NC]
+RewriteRule ^(.*)$ https://carrutherslaw.ca/$1 [R=301,L]
+
+# Old WordPress sitemap and feed URLs
+RedirectMatch 301 ^/wp-sitemap\.xml$ /sitemap_index.xml
+RedirectMatch 301 ^/(.+/)?feed(/.*)?$ /
+
+# WordPress endpoints that no longer exist
+RedirectMatch 410 ^/(wp-login\.php|xmlrpc\.php|wp-cron\.php|wp-comments-post\.php|wp-admin(/.*)?|wp-json(/.*)?)$
