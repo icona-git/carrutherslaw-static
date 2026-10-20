@@ -1,0 +1,94 @@
+# ICONA scaffold-lineage denylist: identifiers of OTHER ICONA clients and their legacy stacks.
+# scripts/lineage-check.sh fails if any of these appears in a shippable file of THIS repo.
+# One token per line, case-insensitive, matched as plain text. Keep tokens free of regex metacharacters.
+#
+# This repo is carrutherslaw.ca (Carruthers Law, Calgary), static conversion from WordPress, cut 2026-10-20.
+# Tooling borrowed from vipondlaw.ca and bowdental.ca static builds, so their names stay listed.
+# ICONA's own names are NOT listed (a page may carry an ICONA credit).
+devgun
+devgunlawoffice
+shoutcms
+crimecode
+dsfamilylaw
+ndbavocats
+rldd.ca
+criminalcodehelp
+ospreylegal
+weirbowen
+hmclawyers
+mmb.international
+kantorllp
+kantor llp
+dunnandassociates
+drnlaw
+castleandassociates
+millsfamilylaw
+calgary-law
+celinedostaler
+leducclassaction
+northwyndclassaction
+jssbarristers
+vipondlaw
+waterous
+susankarpa
+albertalawyersassist
+lawyersassist
+awotaan
+albertarefrigeration
+cambrialaw
+northpointlegal
+wrightbusinesslaw
+pjavocatcriminel
+litcolaw
+litco law
+smithsip
+adamdell
+lavellehealth
+patrick jacques
+rldd
+ross lutz
+lutz dunn
+deshaye
+proservice365
+loamandmoss
+loam & moss
+loam and moss
+crossroadslaw
+coachmycase
+cougle
+englandlam
+hi-hog
+mckaycriminaldefence
+ridoutbarron
+kantorinjurylawyers
+ezraonrileypark
+dartnelllutz
+northfork
+ndb avocats
+greg dunn
+dunn and associates
+rl/dd
+mmb-international
+northern-corridor
+lindsayllp
+osprey legal
+# Added for the landing-page starter (2026-10-09): lp.* clients the ss6 list lacked, spaced forms, and the
+# borrowed-from tokens of the page the handler and layout came from.
+pjavocat
+outsetlaw
+outset law
+oliver spinks
+gurneet dhaliwal
+732-1733
+7787321733
+celine dostaler
+dostaler
+richcanhelp
+rich can help
+immigratingcanada
+hmc lawyers
+# Added for carrutherslaw.ca (2026-10-20): the static rebuilds whose tooling this build reuses.
+bowdental
+bow dental
+bow view dental
+bowview
