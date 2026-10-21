@@ -17,4 +17,7 @@ return [
     'RATE_WINDOW'          => 600,
     'DRY_RUN'              => false,
     'TRUSTED_PROXY_HEADER' => null,
+    // Capacity-notice auto-reply to the sender. false stops it without a deploy;
+    // the text, From and Reply-To defaults live in public/intake/submit.php.
+    'AUTOREPLY'            => true,
 ];
