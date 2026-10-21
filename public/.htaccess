@@ -6,9 +6,25 @@ RewriteEngine On
 RewriteCond %{HTTP_HOST} ^www\.carrutherslaw\.ca$ [NC]
 RewriteRule ^(.*)$ https://carrutherslaw.ca/$1 [R=301,L]
 
+# Merged on WordPress: the Pt. 4 scenario post redirected to its solution
+RedirectMatch 301 ^/in-this-case-the-prejudicial-delay-rule-pt-4/?$ /in-this-case-the-prejudicial-delay-rule-pt-4-solution/
+
 # Old WordPress sitemap and feed URLs
 RedirectMatch 301 ^/wp-sitemap\.xml$ /sitemap_index.xml
 RedirectMatch 301 ^/(.+/)?feed(/.*)?$ /
 
 # WordPress endpoints that no longer exist
 RedirectMatch 410 ^/(wp-login\.php|xmlrpc\.php|wp-cron\.php|wp-comments-post\.php|wp-admin(/.*)?|wp-json(/.*)?)$
+
+# Browser caching (mod_expires is not loaded on this server; mod_headers is)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(jpe?g|png|gif|webp|svg|ico|woff2?|ttf|eot)$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
