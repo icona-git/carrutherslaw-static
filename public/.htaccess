@@ -9,6 +9,9 @@ RewriteRule ^(.*)$ https://carrutherslaw.ca/$1 [R=301,L]
 # Merged on WordPress: the Pt. 4 scenario post redirected to its solution
 RedirectMatch 301 ^/in-this-case-the-prejudicial-delay-rule-pt-4/?$ /in-this-case-the-prejudicial-delay-rule-pt-4-solution/
 
+# Estate pages retired 2026-10: practice narrowed to legal malpractice and civil litigation
+RedirectMatch 301 ^/estate-(litigation|administration)/?$ /practice-areas/
+
 # Old WordPress sitemap and feed URLs
 RedirectMatch 301 ^/wp-sitemap\.xml$ /sitemap_index.xml
 RedirectMatch 301 ^/(.+/)?feed(/.*)?$ /
