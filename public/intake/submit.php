@@ -10,7 +10,8 @@ declare(strict_types=1);
  * lead form on /request-appointment/), runs anti-spam + validation, verifies
  * reCAPTCHA v2, always logs the lead to a CSV, then relays it by email via
  * the Mailgun HTTP API (plain curl, no SDK).
- * Success redirect = /contact/thank-you/.
+ * Success redirect = /contact/thank-you/. After the office copy goes out, the
+ * sender gets a fixed-text auto-reply (capacity notice; config AUTOREPLY).
  *
  * Config lives OUTSIDE the git repo and OUTSIDE the webroot, at
  * <vhost-root>/private/intake-config.php -- see intake-config.example.php
@@ -182,6 +183,49 @@ function intake_send_mailgun(array $cfg, array $f, string $ip, string $ua): arra
     return ['ok' => false, 'status' => 'http_' . $httpCode, 'id' => ''];
 }
 
+/**
+ * Auto-reply to the sender: fixed text, never echoes what they typed, so the
+ * form cannot be used to send arbitrary content to a third party. Sent only
+ * after the office copy went out. A failure is logged and never blocks the
+ * visitor's thank-you page.
+ */
+function intake_send_autoreply(array $cfg, string $to): string
+{
+    $url = rtrim((string) $cfg['MAILGUN_API_BASE'], '/') . '/' . $cfg['MAILGUN_DOMAIN'] . '/messages';
+    $post = [
+        'from' => $cfg['AUTOREPLY_FROM'],
+        'to' => intake_clean_header_value($to),
+        'subject' => $cfg['AUTOREPLY_SUBJECT'],
+        'text' => $cfg['AUTOREPLY_BODY'],
+        'h:Reply-To' => $cfg['AUTOREPLY_REPLY_TO'],
+        'h:Auto-Submitted' => 'auto-replied',
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_USERPWD => 'api:' . $cfg['MAILGUN_SENDING_KEY'],
+        CURLOPT_POSTFIELDS => $post,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_CONNECTTIMEOUT => 15,
+    ]);
+    $body = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr = curl_error($ch);
+    curl_close($ch);
+
+    if ($body === false) {
+        error_log('[intake] auto-reply request failed: ' . $curlErr);
+        return 'curl_error';
+    }
+    if ($httpCode >= 200 && $httpCode < 300) {
+        return 'sent';
+    }
+    error_log('[intake] auto-reply send failed (HTTP ' . $httpCode . '): ' . substr((string) $body, 0, 500));
+    return 'http_' . $httpCode;
+}
+
 // 0) Load config -- <vhost-root>/private/intake-config.php, sibling of the
 //    deploy dir and httpdocs, outside the webroot.
 $vhostRoot = dirname(__DIR__, 3);
@@ -219,6 +263,23 @@ $defaults = [
     'RATE_WINDOW' => 600,
     'DRY_RUN' => false,
     'TRUSTED_PROXY_HEADER' => null,
+    // Auto-reply to the sender (capacity notice). Set AUTOREPLY to false in the
+    // server config to stop it without a deploy.
+    'AUTOREPLY' => true,
+    'AUTOREPLY_FROM' => 'Carruthers Law <website@carrutherslaw.ca>',
+    'AUTOREPLY_REPLY_TO' => 'ian@carrutherslaw.ca',
+    'AUTOREPLY_SUBJECT' => 'Thank you for contacting Carruthers Law',
+    'AUTOREPLY_BODY' => <<<'TXT'
+Thank you for contacting Carruthers Law.
+
+We are not currently accepting new matters and are unable to offer initial consultations at this time. If your inquiry concerns an existing file, we will be in touch.
+
+For a referral to another lawyer, the Law Society of Alberta's Lawyer Referral Service can help:
+https://www.lawsociety.ab.ca/public/findalawyer/
+
+Carruthers Law
+403-910-1730
+TXT,
 ];
 $cfg = is_array($loadedCfg) ? $loadedCfg : [];
 foreach ($defaults as $key => $default) {
@@ -310,6 +371,12 @@ intake_append_csv((string) $cfg['LEADS_DIR'], [
 
 if (!$sendResult['ok']) {
     intake_redirect($returnPath . '?error=send');
+}
+
+// 6b) Auto-reply, only once the office has the inquiry (never in DRY_RUN).
+if (!$cfg['DRY_RUN'] && $cfg['AUTOREPLY']) {
+    $autoStatus = intake_send_autoreply($cfg, $fields['email']);
+    error_log('[intake] auto-reply ' . $autoStatus . ' (' . $formId . ' form)');
 }
 
 // 7) Success
